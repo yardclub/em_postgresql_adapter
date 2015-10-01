@@ -234,7 +234,7 @@ module ActiveRecord
           if conn = @available.shift
             conn
           else
-            Fiber.yield(@pending.push(Fiber.current)
+            Fiber.yield(@pending.push(Fiber.current))
             acquire_connection
           end
         end
