@@ -26,7 +26,9 @@ module ActiveRecord
     class EmPostgreSQLAdapter < PostgreSQLAdapter
       def connect
         begin
-          @connection = PG::EM::Client.new(@connection_parameters)
+          #@connection = PG::EM::Client.new(@connection_parameters)
+          p "Connection params: #{@connection_parameters.inspect}"
+          @connection = PG::EM::ConnectionPool.new(@connection_parameters.merge!({size: 10}))
 
           # OID::Money.precision = (postgresql_version >= 80300) ? 19 : 10
 
