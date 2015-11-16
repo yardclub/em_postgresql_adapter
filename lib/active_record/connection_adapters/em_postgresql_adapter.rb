@@ -28,7 +28,7 @@ module ActiveRecord
         begin
           #@connection = PG::EM::Client.new(@connection_parameters)
           p "Connection params: #{@connection_parameters.inspect}"
-          @connection = PG::EM::ConnectionPool.new(@connection_parameters.merge!({size: 10}))
+          @connection ||= PG::EM::ConnectionPool.new(size: 10, dbname: 'yardclub_development')
 
           # OID::Money.precision = (postgresql_version >= 80300) ? 19 : 10
 
@@ -54,6 +54,7 @@ module ActiveRecord
       end
 
       def establish_connection(owner, spec)
+        p "establish_connection"
         @class_to_pool.clear
         raise RuntimeError, "Anonymous class is not allowed." unless owner.name
         owner_to_pool[owner.name] = ConnectionAdapters::FiberAwareConnectionPool.new(spec)
@@ -65,6 +66,7 @@ module ActiveRecord
       attr_reader :spec, :connections, :size, :reaper
 
       def initialize(spec)
+        p "creating fiber aware connection pool.."
         super()
 
         @spec = spec
@@ -92,6 +94,7 @@ module ActiveRecord
       # #connection can be called any number of times; the connection is
       # held in a hash keyed by the thread id.
       def connection
+        p "fetching reserved connection #{current_connection_id}"
         @reserved_connections[current_connection_id] ||= checkout
       end
 
@@ -166,6 +169,7 @@ module ActiveRecord
       # Raises:
       # - ConnectionTimeoutError: no connection can be obtained from the pool.
       def checkout
+        p "Checking out connection"
         conn = acquire_connection
         conn.instance_variable_set('@owner', Fiber.current)
         checkout_and_verify(conn)
@@ -248,6 +252,7 @@ module ActiveRecord
       end
 
       def new_connection
+        p "New Connection established"
         Base.send(spec.adapter_method, spec.config)
       end
 
