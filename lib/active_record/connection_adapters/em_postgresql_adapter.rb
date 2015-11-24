@@ -27,7 +27,7 @@ module ActiveRecord
       def connect
         begin
           #@connection = PG::EM::Client.new(@connection_parameters)
-          @connection ||= PG::EM::ConnectionPool.new(size: 10, dbname: 'yardclub_development')
+          @connection ||= PG::EM::ConnectionPool.new(@connection_parameters)
 
           # OID::Money.precision = (postgresql_version >= 80300) ? 19 : 10
 
